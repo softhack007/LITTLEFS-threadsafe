@@ -1071,9 +1071,16 @@ static lfs_stag_t lfs_dir_fetchmatch(lfs_t *lfs,
         lfs_pair_swap(dir->pair);
         dir->rev = revs[(r+1)%2];
     }
-
-    LFS_ERROR("Corrupted dir pair at {0x%"PRIx32", 0x%"PRIx32"}",
+	
+	if ((dir != NULL) && (dir->pair[0] == 0) && (dir->pair[1] == 1)) {
+		// dirty hack: silence confusing error msg that always occurs when the filesystem has not been formatted yet
+		LFS_WARN("Superblock not found (dir pair at {0x%"PRIx32", 0x%"PRIx32"}). Filesystem needs formatting.",
             dir->pair[0], dir->pair[1]);
+		
+	} else {
+		LFS_ERROR("Corrupted dir pair at {0x%"PRIx32", 0x%"PRIx32"}",
+            dir->pair[0], dir->pair[1]);
+	}
     return LFS_ERR_CORRUPT;
 }
 
